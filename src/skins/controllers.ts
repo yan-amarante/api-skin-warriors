@@ -1,5 +1,5 @@
-import database from "../database";
-import { buscarSkinsQueries } from "./queries"
+import database from "../database.js";
+import { buscarSkinsQueries } from "./queries.js"
 import { Request, Response } from "express";
 
 const buscarSkins = (req:Request, res:Response) => {

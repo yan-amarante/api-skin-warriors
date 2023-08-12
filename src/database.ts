@@ -1,5 +1,5 @@
 import pg, {Client} from "pg"
-import { URL } from "./dbConfig";
+import { URL } from "./dbConfig.js";
 
 const database: Client = new pg.Client(URL);
 
