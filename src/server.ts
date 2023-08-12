@@ -1,5 +1,5 @@
 import  Express, {Application}  from "express"
-import {router as skinsRoutes} from "./skins/routes.js";
+import {router as skinsRoutes} from "./skins/routes";
 import bodyParser from "body-parser";
 import cors from "cors"
 

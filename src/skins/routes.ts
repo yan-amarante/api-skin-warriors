@@ -1,5 +1,5 @@
 import  { Router }  from "express";
-import { buscarSkins } from "./controllers.js";
+import { buscarSkins } from "./controllers";
 
 const router:Router = Router();
 
