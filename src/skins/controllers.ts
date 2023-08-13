@@ -1,16 +1,27 @@
 import database from "../database";
-import { buscarSkinsQueries } from "./queries"
+import { buscarGridSkinsQueries, consultarTamanhoTabelaQueries } from "./queries"
 import { Request, Response } from "express";
 
-const buscarSkins = (req:Request, res:Response) => {
-    database.query(buscarSkinsQueries).then(
-        (resultado:any) => {
+const buscarGridSkins = (req:Request, res:Response) => {
+    database.query(buscarGridSkinsQueries).then(
+        (resultado) => {
             res.status(200).send({ skins: resultado.rows })
         },
-        (erro:any) => {
+        (erro) => {
             res.status(500).send({ erro: erro })
         }
     )
     }
 
-export { buscarSkins }
+    const consultarTamanhoTabela = (req:Request, res:Response) => {
+        database.query(consultarTamanhoTabelaQueries).then(
+            (resultado) => {
+                res.status(200).send({ tamanho: resultado.rows })
+            },
+            (erro) => {
+                res.status(500).send({ erro: erro })
+            }
+        )
+        }
+
+export { buscarGridSkins, consultarTamanhoTabela }

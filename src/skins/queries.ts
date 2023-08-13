@@ -1,5 +1,6 @@
-const buscarSkinsQueries :string = 'SELECT * FROM skins'
+const buscarGridSkinsQueries :string = 'SELECT * FROM skins ORDER BY random() LIMIT 6'
+const consultarTamanhoTabelaQueries: string = 'SELECT count(*) FROM skins'
 
 
 
-export { buscarSkinsQueries }
+export { buscarGridSkinsQueries, consultarTamanhoTabelaQueries }
