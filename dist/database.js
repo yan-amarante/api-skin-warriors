@@ -4,8 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const pg_1 = __importDefault(require("pg"));
-const dbConfig_1 = require("./dbConfig");
-const database = new pg_1.default.Client(dbConfig_1.URL);
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const database = new pg_1.default.Client(process.env.DATABASE_URL);
 database.connect((erro) => {
     if (erro) {
         return console.log("Não foi possivel conectar com o ElephantSQL", erro);

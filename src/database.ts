@@ -1,14 +1,27 @@
-import pg, {Client} from "pg"
-import { URL } from "./dbConfig";
+import pg, { Client } from "pg"
 
-const database: Client = new pg.Client(URL);
+import dotenv from "dotenv";
 
-database.connect((erro:any) => {
-    if(erro){
+
+dotenv.config();
+
+
+const database: Client = new pg.Client(process.env.DATABASE_URL);
+
+
+database.connect((erro: any) => {
+
+    if (erro) {
+
         return console.log("Não foi possivel conectar com o ElephantSQL", erro);
-    }else {
+
+    } else {
+
         return console.log("Conectado ao ElephantSQL!");
+
     }
+
 });
+
 
 export default database

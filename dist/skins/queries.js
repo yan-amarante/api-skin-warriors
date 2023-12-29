@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.consultarTamanhoTabelaQueries = exports.buscarGridSkinsQueries = void 0;
-const buscarGridSkinsQueries = 'SELECT * FROM skins ORDER BY random() LIMIT 6';
-exports.buscarGridSkinsQueries = buscarGridSkinsQueries;
-const consultarTamanhoTabelaQueries = 'SELECT count(*) FROM skins';
-exports.consultarTamanhoTabelaQueries = consultarTamanhoTabelaQueries;
+exports.listSkinsQueries = void 0;
+const listSkinsQueries = 'SELECT * FROM skins';
+exports.listSkinsQueries = listSkinsQueries;
 //# sourceMappingURL=queries.js.map

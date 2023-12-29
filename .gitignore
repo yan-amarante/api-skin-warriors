@@ -1,3 +1,2 @@
 node_modules
-dbConfig.ts
-dbConfig.js
+.env

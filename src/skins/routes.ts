@@ -1,9 +1,12 @@
-import  { Router }  from "express";
-import { buscarGridSkins, consultarTamanhoTabela } from "./controllers";
+import { Router } from "express";
 
-const router:Router = Router();
+import { listSkins } from "./controllers";
 
-router.get('/buscar-grid-skins', buscarGridSkins);
-router.get('/consultar-tamanho-tabela', consultarTamanhoTabela);
 
-export  {router}
+const router: Router = Router();
+
+
+router.get('/list-skins', listSkins);
+
+
+export { router }

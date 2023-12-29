@@ -5,5 +5,6 @@ const express_1 = require("express");
 const controllers_1 = require("./controllers");
 const router = (0, express_1.Router)();
 exports.router = router;
-router.get('/list-skins', controllers_1.listSkins);
+router.get('/list-sales', controllers_1.listSales);
+router.post("/create-sale", controllers_1.createSale);
 //# sourceMappingURL=routes.js.map
