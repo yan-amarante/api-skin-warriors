@@ -23,7 +23,7 @@ async function listSales(req: Request, res: Response) {
                     category: item.category
                 };
                 return acc;
-            }, {});
+            }, {})
 
             res.status(200).send(transformedObject)
 

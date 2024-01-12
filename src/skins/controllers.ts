@@ -23,24 +23,86 @@ async function listSkins(req: Request, res: Response) {
 
 }
 
+function removeDuplicateRows(result: any, keyName: any, deleteKey: boolean) {
+
+    const array: any = []
+
+    result.rows.forEach((item: any) => {
+
+        const exists = array.some((object: any) => object[keyName] === item[keyName])
+
+
+        if (!exists) {
+
+            if (deleteKey) delete item["weapon.name"]
+
+            array.push(item)
+
+        }
+
+    })
+
+    return array
+
+}
+
 async function searchCategories(req: Request, res: Response) {
 
     try {
 
-        const transormedObject: any[] = []
+        let categoryName: any[] = []
+
+        let weaponName: any[] = []
+
 
         const result = await database.query(searchCategoriesQueries)
 
-        result.rows.forEach((item: any) => {
 
-            const exists = transormedObject.some((object) => object["category.id"] === item["category.id"]);
+        categoryName = removeDuplicateRows(result, "category.name", true)
 
-            if (!exists) {
-                transormedObject.push(item);
+        weaponName = removeDuplicateRows(result, "weapon.name", false)
+
+
+        categoryName.push(weaponName)
+
+
+        const flattenArray = categoryName.flat()
+
+        const transformedObject = flattenArray.reduce((acc, category) => {
+
+            const categoryName = category["category.name"]
+
+            const weaponName = category["weapon.name"]
+
+
+            if (categoryName) {
+
+                if (!acc[categoryName]) {
+
+                    acc[categoryName] = {
+
+                        categoryName: categoryName,
+
+                        weapons: []
+
+                    }
+
+                }
+
+                if (weaponName) {
+
+                    acc[categoryName].weapons.push(weaponName)
+
+                }
+
             }
-        })
 
-        res.status(200).send(transormedObject)
+            return acc
+
+        }, {})
+
+
+        res.status(200).send(transformedObject)
 
     }
 

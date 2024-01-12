@@ -1,5 +1,5 @@
-const listSkinsQueries :string = 'SELECT * FROM skins'
+const listSkinsQueries: string = 'SELECT * FROM skins'
 
-const searchCategoriesQueries :string = 'SELECT "category.id","category.name" FROM skins'
+const searchCategoriesQueries: string = 'SELECT "category.name", "weapon.name" FROM skins'
 
 export { listSkinsQueries, searchCategoriesQueries }

@@ -16,17 +16,44 @@ async function listSkins(req, res) {
     }
 }
 exports.listSkins = listSkins;
+function removeDuplicateRows(result, keyName, deleteKey) {
+    const array = [];
+    result.rows.forEach((item) => {
+        const exists = array.some((object) => object[keyName] === item[keyName]);
+        if (!exists) {
+            if (deleteKey)
+                delete item["weapon.name"];
+            array.push(item);
+        }
+    });
+    return array;
+}
 async function searchCategories(req, res) {
     try {
-        const transormedObject = [];
+        let categoryName = [];
+        let weaponName = [];
         const result = await database_1.default.query(queries_1.searchCategoriesQueries);
-        result.rows.forEach((item) => {
-            const exists = transormedObject.some((object) => object["category.id"] === item["category.id"]);
-            if (!exists) {
-                transormedObject.push(item);
+        categoryName = removeDuplicateRows(result, "category.name", true);
+        weaponName = removeDuplicateRows(result, "weapon.name", false);
+        categoryName.push(weaponName);
+        const flattenArray = categoryName.flat();
+        const transformedObject = flattenArray.reduce((acc, category) => {
+            const categoryName = category["category.name"];
+            const weaponName = category["weapon.name"];
+            if (categoryName) {
+                if (!acc[categoryName]) {
+                    acc[categoryName] = {
+                        categoryName: categoryName,
+                        weapons: []
+                    };
+                }
+                if (weaponName) {
+                    acc[categoryName].weapons.push(weaponName);
+                }
             }
-        });
-        res.status(200).send(transormedObject);
+            return acc;
+        }, {});
+        res.status(200).send(transformedObject);
     }
     catch (error) {
         res.status(500).send({ erro: error });
