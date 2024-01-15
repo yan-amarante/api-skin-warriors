@@ -1,1 +1,1 @@
-{"version":3,"file":"queries.js","sourceRoot":"","sources":["../../src/skins/queries.ts"],"names":[],"mappings":";;;AAAA,MAAM,gBAAgB,GAAW,qBAAqB,CAAA;AAI7C,4CAAgB;AAFzB,MAAM,uBAAuB,GAAW,kDAAkD,CAAA;AAE/D,0DAAuB"}
+{"version":3,"file":"queries.js","sourceRoot":"","sources":["../../src/skins/queries.ts"],"names":[],"mappings":";;;AAAA,MAAM,gBAAgB,GAAW,qBAAqB,CAAA;AAM7C,4CAAgB;AAJzB,MAAM,uBAAuB,GAAW,kDAAkD,CAAA;AAI/D,0DAAuB;AAFlD,MAAM,yBAAyB,GAAW,8HAA8H,CAAA;AAEpH,8DAAyB"}

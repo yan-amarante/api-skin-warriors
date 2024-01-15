@@ -1,6 +1,6 @@
 import database from "../database";
 
-import { listSkinsQueries, searchCategoriesQueries } from "./queries"
+import { listSkinsQueries, searchCategoriesQueries, searchPatternInfosQueries } from "./queries"
 
 import { Request, Response } from "express";
 
@@ -50,29 +50,42 @@ async function searchCategories(req: Request, res: Response) {
 
     try {
 
-        let categoryName: any[] = []
+        const queryParams = [req.query.patterns]
 
-        let weaponName: any[] = []
+        let resultPattern: any
 
+
+        if (queryParams.length) resultPattern = await database.query(searchPatternInfosQueries, queryParams)
 
         const result = await database.query(searchCategoriesQueries)
 
 
-        categoryName = removeDuplicateRows(result, "category.name", true)
+        const categoryName: any[] = removeDuplicateRows(result, "category.name", true)
 
-        weaponName = removeDuplicateRows(result, "weapon.name", false)
+        const weaponName: any[] = removeDuplicateRows(result, "weapon.name", false)
 
+
+        categoryName.push(resultPattern.rows)
 
         categoryName.push(weaponName)
 
 
         const flattenArray = categoryName.flat()
 
+
         const transformedObject = flattenArray.reduce((acc, category) => {
 
             const categoryName = category["category.name"]
 
             const weaponName = category["weapon.name"]
+
+            const patternName = category["pattern.name"]
+
+            const wears = category["wears"]
+
+            const minFloat = category["min_float"]
+
+            const maxFloat = category["max_float"]
 
 
             if (categoryName) {
@@ -83,7 +96,7 @@ async function searchCategories(req: Request, res: Response) {
 
                         categoryName: categoryName,
 
-                        weapons: []
+                        weapons: {}
 
                     }
 
@@ -91,7 +104,35 @@ async function searchCategories(req: Request, res: Response) {
 
                 if (weaponName) {
 
-                    acc[categoryName].weapons.push(weaponName)
+                    if (categoryName === req.query.patterns) {
+
+                        if (patternName && wears && minFloat !== undefined && maxFloat !== undefined) {
+
+                            if (!acc[categoryName].weapons[weaponName]) {
+
+                                acc[categoryName].weapons[weaponName] = {}
+
+                            }
+
+                            acc[categoryName].weapons[weaponName][patternName] = {
+
+                                patternName: patternName,
+
+                                wears: wears,
+
+                                min_float: minFloat,
+
+                                max_float: maxFloat
+
+                            }
+
+                        }
+
+                    } else {
+
+                        acc[categoryName].weapons[weaponName] = {}
+
+                    }
 
                 }
 

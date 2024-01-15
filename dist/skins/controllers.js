@@ -30,25 +30,47 @@ function removeDuplicateRows(result, keyName, deleteKey) {
 }
 async function searchCategories(req, res) {
     try {
-        let categoryName = [];
-        let weaponName = [];
+        const queryParams = [req.query.patterns];
+        let resultPattern;
+        if (queryParams.length)
+            resultPattern = await database_1.default.query(queries_1.searchPatternInfosQueries, queryParams);
         const result = await database_1.default.query(queries_1.searchCategoriesQueries);
-        categoryName = removeDuplicateRows(result, "category.name", true);
-        weaponName = removeDuplicateRows(result, "weapon.name", false);
+        const categoryName = removeDuplicateRows(result, "category.name", true);
+        const weaponName = removeDuplicateRows(result, "weapon.name", false);
+        categoryName.push(resultPattern.rows);
         categoryName.push(weaponName);
         const flattenArray = categoryName.flat();
         const transformedObject = flattenArray.reduce((acc, category) => {
             const categoryName = category["category.name"];
             const weaponName = category["weapon.name"];
+            const patternName = category["pattern.name"];
+            const wears = category["wears"];
+            const minFloat = category["min_float"];
+            const maxFloat = category["max_float"];
             if (categoryName) {
                 if (!acc[categoryName]) {
                     acc[categoryName] = {
                         categoryName: categoryName,
-                        weapons: []
+                        weapons: {}
                     };
                 }
                 if (weaponName) {
-                    acc[categoryName].weapons.push(weaponName);
+                    if (categoryName === req.query.patterns) {
+                        if (patternName && wears && minFloat !== undefined && maxFloat !== undefined) {
+                            if (!acc[categoryName].weapons[weaponName]) {
+                                acc[categoryName].weapons[weaponName] = {};
+                            }
+                            acc[categoryName].weapons[weaponName][patternName] = {
+                                patternName: patternName,
+                                wears: wears,
+                                min_float: minFloat,
+                                max_float: maxFloat
+                            };
+                        }
+                    }
+                    else {
+                        acc[categoryName].weapons[weaponName] = {};
+                    }
                 }
             }
             return acc;
