@@ -15,7 +15,6 @@ async function listSales(req, res) {
                 name: item.name,
                 pattern: item.pattern,
                 wear: item.wear,
-                float: item.float,
                 price: item.price,
                 category: item.category
             };
@@ -28,7 +27,7 @@ async function listSales(req, res) {
 }
 exports.listSales = listSales;
 async function createSale(req, res) {
-    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.float, req.body.price, req.body.category];
+    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category];
     database_1.default.query(queries_1.createSaleQueries, values).then((resultado) => {
         res.status(200).send({ message: "sucesso" });
     }, (erro) => {

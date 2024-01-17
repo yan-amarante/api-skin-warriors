@@ -18,7 +18,6 @@ async function listSales(req: Request, res: Response) {
                     name: item.name,
                     pattern: item.pattern,
                     wear: item.wear,
-                    float: item.float,
                     price: item.price,
                     category: item.category
                 };
@@ -41,7 +40,7 @@ async function listSales(req: Request, res: Response) {
 
 async function createSale(req: Request, res: Response) {
 
-    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.float, req.body.price, req.body.category]
+    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category]
 
     database.query(createSaleQueries, values).then(
 
