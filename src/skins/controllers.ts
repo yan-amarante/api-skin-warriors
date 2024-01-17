@@ -83,9 +83,7 @@ async function searchCategories(req: Request, res: Response) {
 
             const wears = category["wears"]
 
-            const minFloat = category["min_float"]
-
-            const maxFloat = category["max_float"]
+            const image = category["image"]
 
 
             if (categoryName) {
@@ -106,7 +104,7 @@ async function searchCategories(req: Request, res: Response) {
 
                     if (categoryName === req.query.patterns) {
 
-                        if (patternName && wears && minFloat !== undefined && maxFloat !== undefined) {
+                        if (patternName && wears && image !== undefined) {
 
                             if (!acc[categoryName].weapons[weaponName]) {
 
@@ -120,9 +118,7 @@ async function searchCategories(req: Request, res: Response) {
 
                                 wears: wears,
 
-                                min_float: minFloat,
-
-                                max_float: maxFloat
+                                image: image,
 
                             }
 

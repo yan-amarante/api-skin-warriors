@@ -45,8 +45,7 @@ async function searchCategories(req, res) {
             const weaponName = category["weapon.name"];
             const patternName = category["pattern.name"];
             const wears = category["wears"];
-            const minFloat = category["min_float"];
-            const maxFloat = category["max_float"];
+            const image = category["image"];
             if (categoryName) {
                 if (!acc[categoryName]) {
                     acc[categoryName] = {
@@ -56,15 +55,14 @@ async function searchCategories(req, res) {
                 }
                 if (weaponName) {
                     if (categoryName === req.query.patterns) {
-                        if (patternName && wears && minFloat !== undefined && maxFloat !== undefined) {
+                        if (patternName && wears && image !== undefined) {
                             if (!acc[categoryName].weapons[weaponName]) {
                                 acc[categoryName].weapons[weaponName] = {};
                             }
                             acc[categoryName].weapons[weaponName][patternName] = {
                                 patternName: patternName,
                                 wears: wears,
-                                min_float: minFloat,
-                                max_float: maxFloat
+                                image: image,
                             };
                         }
                     }
