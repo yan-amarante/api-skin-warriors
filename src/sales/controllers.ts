@@ -1,15 +1,15 @@
 import database from "../database";
 
-import { listSalesQueries, listSalesPageQueries, createSaleQueries } from "./queries"
+import { listSalesQueries, listSalesPageQueries, listSalesCount, createSaleQueries } from "./queries"
 
 import { Request, Response } from "express";
 
 
 async function listSales(req: Request, res: Response) {
 
-    const queryParams:any = req.query.page
+    const queryParams: any = req.query.page
 
-    let values = [(queryParams - 1) * 14] 
+    let values = [(queryParams - 1) * 14]
 
     if (queryParams === undefined) {
 
@@ -43,7 +43,15 @@ async function listSales(req: Request, res: Response) {
         )
 
     } else if (queryParams !== undefined) {
-        
+
+        const resultCount = await database.query(listSalesCount)
+
+        const totalItems = resultCount.rows[0].count
+
+        const limit = 14
+
+        const rowsNumber = Math.ceil(totalItems / limit)
+
         const result = await database.query(listSalesPageQueries, values)
 
         const transformedObject = result.rows.reduce((acc, item) => {
@@ -58,6 +66,8 @@ async function listSales(req: Request, res: Response) {
             };
             return acc;
         }, {})
+
+        transformedObject.numberOfPages = rowsNumber
 
         res.status(200).send(transformedObject)
 

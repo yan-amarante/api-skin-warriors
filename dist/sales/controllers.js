@@ -29,6 +29,10 @@ async function listSales(req, res) {
         });
     }
     else if (queryParams !== undefined) {
+        const resultCount = await database_1.default.query(queries_1.listSalesCount);
+        const totalItems = resultCount.rows[0].count;
+        const limit = 14;
+        const rowsNumber = Math.ceil(totalItems / limit);
         const result = await database_1.default.query(queries_1.listSalesPageQueries, values);
         const transformedObject = result.rows.reduce((acc, item) => {
             acc[item.id] = {
@@ -42,6 +46,7 @@ async function listSales(req, res) {
             };
             return acc;
         }, {});
+        transformedObject.numberOfPages = rowsNumber;
         res.status(200).send(transformedObject);
     }
 }
