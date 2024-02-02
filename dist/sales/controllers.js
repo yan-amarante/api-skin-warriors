@@ -7,8 +7,30 @@ exports.createSale = exports.listSales = void 0;
 const database_1 = __importDefault(require("../database"));
 const queries_1 = require("./queries");
 async function listSales(req, res) {
-    database_1.default.query(queries_1.listSalesQueries).then((resultado) => {
-        const transformedObject = resultado.rows.reduce((acc, item) => {
+    const queryParams = req.query.page;
+    let values = [(queryParams - 1) * 14];
+    if (queryParams === undefined) {
+        database_1.default.query(queries_1.listSalesQueries).then((resultado) => {
+            const transformedObject = resultado.rows.reduce((acc, item) => {
+                acc[item.id] = {
+                    id: item.id,
+                    image: item.image,
+                    name: item.name,
+                    pattern: item.pattern,
+                    wear: item.wear,
+                    price: item.price,
+                    category: item.category
+                };
+                return acc;
+            }, {});
+            res.status(200).send(transformedObject);
+        }, (erro) => {
+            res.status(500).send({ erro: erro });
+        });
+    }
+    else if (queryParams !== undefined) {
+        const result = await database_1.default.query(queries_1.listSalesPageQueries, values);
+        const transformedObject = result.rows.reduce((acc, item) => {
             acc[item.id] = {
                 id: item.id,
                 image: item.image,
@@ -21,9 +43,7 @@ async function listSales(req, res) {
             return acc;
         }, {});
         res.status(200).send(transformedObject);
-    }, (erro) => {
-        res.status(500).send({ erro: erro });
-    });
+    }
 }
 exports.listSales = listSales;
 async function createSale(req, res) {

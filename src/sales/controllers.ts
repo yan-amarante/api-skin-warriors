@@ -1,40 +1,67 @@
 import database from "../database";
 
-import { listSalesQueries, createSaleQueries } from "./queries"
+import { listSalesQueries, listSalesPageQueries, createSaleQueries } from "./queries"
 
 import { Request, Response } from "express";
 
 
 async function listSales(req: Request, res: Response) {
 
-    database.query(listSalesQueries).then(
+    const queryParams:any = req.query.page
 
-        (resultado) => {
+    let values = [(queryParams - 1) * 14] 
 
-            const transformedObject = resultado.rows.reduce((acc, item) => {
-                acc[item.id] = {
-                    id: item.id,
-                    image: item.image,
-                    name: item.name,
-                    pattern: item.pattern,
-                    wear: item.wear,
-                    price: item.price,
-                    category: item.category
-                };
-                return acc;
-            }, {})
+    if (queryParams === undefined) {
 
-            res.status(200).send(transformedObject)
+        database.query(listSalesQueries).then(
 
-        },
+            (resultado) => {
 
-        (erro) => {
+                const transformedObject = resultado.rows.reduce((acc, item) => {
+                    acc[item.id] = {
+                        id: item.id,
+                        image: item.image,
+                        name: item.name,
+                        pattern: item.pattern,
+                        wear: item.wear,
+                        price: item.price,
+                        category: item.category
+                    };
+                    return acc;
+                }, {})
 
-            res.status(500).send({ erro: erro })
+                res.status(200).send(transformedObject)
 
-        }
+            },
 
-    )
+            (erro) => {
+
+                res.status(500).send({ erro: erro })
+
+            }
+
+        )
+
+    } else if (queryParams !== undefined) {
+        
+        const result = await database.query(listSalesPageQueries, values)
+
+        const transformedObject = result.rows.reduce((acc, item) => {
+            acc[item.id] = {
+                id: item.id,
+                image: item.image,
+                name: item.name,
+                pattern: item.pattern,
+                wear: item.wear,
+                price: item.price,
+                category: item.category
+            };
+            return acc;
+        }, {})
+
+        res.status(200).send(transformedObject)
+
+    }
 
 }
 
