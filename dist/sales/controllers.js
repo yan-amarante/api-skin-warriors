@@ -64,7 +64,7 @@ async function listSales(req, res) {
             rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE name=$1", nameParams);
         else if (nameParams[0] === undefined && wearParams[0] !== undefined)
             rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE wear=$1", wearParams);
-        else if (nameParams[0] && wearParams[0] === undefined)
+        else
             rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales");
         if (nameParams[0] && wearParams[0] !== undefined) {
             values.push(nameParams[0], wearParams[0]);

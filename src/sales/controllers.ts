@@ -60,7 +60,7 @@ async function countNumberOfPages(query: string, value: any = null) {
     const limit = 14
 
     const numberOfPages = Math.ceil(totalItems / limit)
-    
+
     if (numberOfPages === 0) return 1
 
     else return numberOfPages
@@ -99,8 +99,9 @@ async function listSales(req: Request, res: Response) {
 
         else if (nameParams[0] === undefined && wearParams[0] !== undefined) rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE wear=$1", wearParams)
 
-        else if (nameParams[0] && wearParams[0] === undefined) rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales")
+        else rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales")
 
+        
         if (nameParams[0] && wearParams[0] !== undefined) {
 
             values.push(nameParams[0], wearParams[0])
