@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSale = exports.listSales = void 0;
+exports.closeSale = exports.createSale = exports.listSales = void 0;
 const database_1 = __importDefault(require("../database"));
 const queries_1 = require("./queries");
 function transformToObject(array) {
@@ -97,4 +97,15 @@ async function createSale(req, res) {
     });
 }
 exports.createSale = createSale;
+async function closeSale(req, res) {
+    try {
+        const values = [req.params.id];
+        let result = await database_1.default.query("DELETE FROM sales WHERE id=$1", values);
+        res.status(200).send({ message: "sucesso" });
+    }
+    catch (erro) {
+        res.status(500).send({ erro: erro });
+    }
+}
+exports.closeSale = closeSale;
 //# sourceMappingURL=controllers.js.map

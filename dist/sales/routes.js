@@ -7,4 +7,5 @@ const router = (0, express_1.Router)();
 exports.router = router;
 router.get('/list-sales', controllers_1.listSales);
 router.post("/create-sale", controllers_1.createSale);
+router.delete("/close-sale/:id", controllers_1.closeSale);
 //# sourceMappingURL=routes.js.map

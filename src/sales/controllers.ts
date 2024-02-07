@@ -101,7 +101,7 @@ async function listSales(req: Request, res: Response) {
 
         else rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales")
 
-        
+
         if (nameParams[0] && wearParams[0] !== undefined) {
 
             values.push(nameParams[0], wearParams[0])
@@ -166,5 +166,25 @@ async function createSale(req: Request, res: Response) {
 
 }
 
+async function closeSale(req: Request, res: Response) {
 
-export { listSales, createSale }
+    try {
+
+        const values = [req.params.id]
+
+        let result: any = await database.query("DELETE FROM sales WHERE id=$1", values)
+
+        res.status(200).send({ message: "sucesso" })
+
+    }
+
+    catch (erro) {
+
+        res.status(500).send({ erro: erro })
+
+    }
+
+}
+
+
+export { listSales, createSale, closeSale }

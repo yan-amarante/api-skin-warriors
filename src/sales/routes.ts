@@ -1,6 +1,6 @@
 import  { Router }  from "express";
 
-import { listSales, createSale } from "./controllers";
+import { listSales, createSale, closeSale } from "./controllers";
 
 
 const router:Router = Router();
@@ -9,6 +9,8 @@ const router:Router = Router();
 router.get('/list-sales', listSales);
 
 router.post("/create-sale", createSale)
+
+router.delete("/close-sale/:id", closeSale)
 
 
 export  {router}
