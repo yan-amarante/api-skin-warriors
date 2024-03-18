@@ -1,9 +1,10 @@
-import database from "../database";
+import database, {connectDatabase} from "../database";
 
 import { listSalesQueries, listSalesCount, listSalesPageQueries, createSaleQueries } from "./queries"
 
 import { Request, Response } from "express";
 
+connectDatabase()
 
 function transformToObject(array: any) {
 

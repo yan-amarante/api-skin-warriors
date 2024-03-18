@@ -1,11 +1,32 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.closeSale = exports.createSale = exports.listSales = void 0;
-const database_1 = __importDefault(require("../database"));
+const database_1 = __importStar(require("../database"));
 const queries_1 = require("./queries");
+(0, database_1.connectDatabase)();
 function transformToObject(array) {
     const object = array.reduce((acc, item) => {
         acc[item.id] = {
@@ -46,55 +67,56 @@ async function countNumberOfPages(query, value = null) {
         return numberOfPages;
 }
 async function listSales(req, res) {
-    const pageParams = req.query.page;
-    const filterParams = [req.query.name, req.query.wear];
-    const nameParams = [req.query.name];
-    const wearParams = [req.query.wear];
-    if (pageParams === undefined) {
-        listAllSales(req, res);
-    }
-    else if (pageParams !== undefined) {
-        const limit = 14;
-        const values = [(pageParams - 1) * limit];
-        let rowsNumber;
-        let result;
-        if (nameParams[0] && wearParams[0] !== undefined)
-            rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE name=$1 AND wear=$2", filterParams);
-        else if (nameParams[0] !== undefined && wearParams[0] === undefined)
-            rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE name=$1", nameParams);
-        else if (nameParams[0] === undefined && wearParams[0] !== undefined)
-            rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE wear=$1", wearParams);
-        else
-            rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales");
-        if (nameParams[0] && wearParams[0] !== undefined) {
-            values.push(nameParams[0], wearParams[0]);
-            result = await database_1.default.query('SELECT * FROM sales WHERE name=$2 AND wear=$3 OFFSET $1 LIMIT 14', values);
+    try {
+        const pageParams = req.query.page;
+        const nameParam = req.query.name;
+        const wearParam = req.query.wear;
+        let filterQuery = 'SELECT count(*) FROM sales';
+        let values = [];
+        let resultQuery = 'SELECT * FROM sales';
+        let filterParams = [];
+        if (nameParam !== undefined && wearParam !== undefined) {
+            filterQuery = 'SELECT count(*) FROM sales WHERE name=$1 AND wear=$2';
+            resultQuery = 'SELECT * FROM sales WHERE name=$2 AND wear=$3';
+            filterParams = [nameParam, wearParam];
+            values = [(pageParams - 1) * 14, nameParam, wearParam];
         }
-        else if (nameParams[0] !== undefined && wearParams[0] === undefined) {
-            values.push(nameParams[0]);
-            result = await database_1.default.query('SELECT * FROM sales WHERE name=$2 OFFSET $1 LIMIT 14', values);
+        else if (nameParam !== undefined) {
+            filterQuery = 'SELECT count(*) FROM sales WHERE name=$1';
+            resultQuery = 'SELECT * FROM sales WHERE name=$2';
+            filterParams = [nameParam];
+            values = [(pageParams - 1) * 14, nameParam];
         }
-        else if (nameParams[0] === undefined && wearParams[0] !== undefined) {
-            values.push(wearParams[0]);
-            result = await database_1.default.query('SELECT * FROM sales WHERE wear=$2 OFFSET $1 LIMIT 14', values);
+        else if (wearParam !== undefined) {
+            filterQuery = 'SELECT count(*) FROM sales WHERE wear=$1';
+            resultQuery = 'SELECT * FROM sales WHERE wear=$2';
+            filterParams = [wearParam];
+            values = [(pageParams - 1) * 14, wearParam];
         }
         else {
-            result = await database_1.default.query('SELECT * FROM sales OFFSET $1 LIMIT 14', values);
+            filterQuery = 'SELECT count(*) FROM sales';
+            values = [(pageParams - 1) * 14];
         }
+        const rowsNumber = await countNumberOfPages(filterQuery, filterParams);
+        const result = await database_1.default.query(resultQuery + ' OFFSET $1 LIMIT 14', values);
         const transformedObject = transformToObject(result.rows);
         transformedObject.numberOfPages = rowsNumber;
         res.status(200).send(transformedObject);
     }
+    catch (error) {
+        res.status(500).send({ erro: error });
+    }
 }
 exports.listSales = listSales;
-//rowsNumber by filter // search by query params
 async function createSale(req, res) {
-    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category];
-    database_1.default.query(queries_1.createSaleQueries, values).then((resultado) => {
+    try {
+        const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category];
+        const result = await database_1.default.query(queries_1.createSaleQueries, values);
         res.status(200).send({ message: "sucesso" });
-    }, (erro) => {
-        res.status(500).send({ erro: erro });
-    });
+    }
+    catch (error) {
+        res.status(500).send({ erro: error });
+    }
 }
 exports.createSale = createSale;
 async function closeSale(req, res) {

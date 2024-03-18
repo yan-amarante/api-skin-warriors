@@ -1,9 +1,10 @@
-import database from "../database";
+import database, { connectDatabase } from "../database";
 
 import { listSkinsQueries, searchCategoriesQueries, searchPatternInfosQueries } from "./queries"
 
 import { Request, Response } from "express";
 
+connectDatabase()
 
 async function listSkins(req: Request, res: Response) {
 
