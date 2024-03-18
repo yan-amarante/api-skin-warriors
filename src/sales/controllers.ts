@@ -27,7 +27,6 @@ function transformToObject(array: any) {
 
 async function listAllSales(req: Request, res: Response) {
 
-
     try {
 
         let result: any = await database.query(listSalesQueries)
@@ -47,7 +46,6 @@ async function listAllSales(req: Request, res: Response) {
 }
 
 async function countNumberOfPages(query: string, value: any = null) {
-
 
     let resultCount: any
 
@@ -69,68 +67,66 @@ async function countNumberOfPages(query: string, value: any = null) {
 
 async function listSales(req: Request, res: Response) {
 
-    const pageParams: any = req.query.page
+    try {
 
-    const filterParams = [req.query.name, req.query.wear]
+        const pageParams: any = req.query.page
 
-    const nameParams: any = [req.query.name]
+        const nameParam: any = req.query.name
 
-    const wearParams: any = [req.query.wear]
-
-
-    if (pageParams === undefined) {
-
-        listAllSales(req, res)
-
-    } else if (pageParams !== undefined) {
-
-        const limit = 14
-
-        const values = [(pageParams - 1) * limit]
-
-        let rowsNumber
-
-        let result: any
+        const wearParam: any = req.query.wear
 
 
-        if (nameParams[0] && wearParams[0] !== undefined) rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE name=$1 AND wear=$2", filterParams)
+        let filterQuery = 'SELECT count(*) FROM sales'
 
-        else if (nameParams[0] !== undefined && wearParams[0] === undefined) rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE name=$1", nameParams)
+        let values: any[] = []
 
-        else if (nameParams[0] === undefined && wearParams[0] !== undefined) rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales WHERE wear=$1", wearParams)
+        let resultQuery = 'SELECT * FROM sales'
 
-        else rowsNumber = await countNumberOfPages("SELECT count(*) FROM sales")
+        let filterParams: any[] = []
 
 
-        if (nameParams[0] && wearParams[0] !== undefined) {
+        if (nameParam !== undefined && wearParam !== undefined) {
 
-            values.push(nameParams[0], wearParams[0])
+            filterQuery = 'SELECT count(*) FROM sales WHERE name=$1 AND wear=$2'
 
-            result = await database.query('SELECT * FROM sales WHERE name=$2 AND wear=$3 OFFSET $1 LIMIT 14', values)
+            resultQuery = 'SELECT * FROM sales WHERE name=$2 AND wear=$3'
 
-        }
-        else if (nameParams[0] !== undefined && wearParams[0] === undefined) {
+            filterParams = [nameParam, wearParam]
 
-            values.push(nameParams[0])
+            values = [(pageParams - 1) * 14, nameParam, wearParam]
 
-            result = await database.query('SELECT * FROM sales WHERE name=$2 OFFSET $1 LIMIT 14', values)
+        } else if (nameParam !== undefined) {
 
-        }
+            filterQuery = 'SELECT count(*) FROM sales WHERE name=$1'
 
-        else if (nameParams[0] === undefined && wearParams[0] !== undefined) {
+            resultQuery = 'SELECT * FROM sales WHERE name=$2'
 
-            values.push(wearParams[0])
+            filterParams = [nameParam]
 
-            result = await database.query('SELECT * FROM sales WHERE wear=$2 OFFSET $1 LIMIT 14', values)
+            values = [(pageParams - 1) * 14, nameParam]
 
-        }
+        } else if (wearParam !== undefined) {
 
-        else {
+            filterQuery = 'SELECT count(*) FROM sales WHERE wear=$1'
 
-            result = await database.query('SELECT * FROM sales OFFSET $1 LIMIT 14', values)
+            resultQuery = 'SELECT * FROM sales WHERE wear=$2'
+
+            filterParams = [wearParam]
+
+            values = [(pageParams - 1) * 14, wearParam]
+
+        }else {
+
+            filterQuery = 'SELECT count(*) FROM sales'
+
+            values = [(pageParams - 1) * 14]
 
         }
 
+
+        const rowsNumber = await countNumberOfPages(filterQuery, filterParams)
+
+        const result = await database.query(resultQuery + ' OFFSET $1 LIMIT 14', values)
 
         const transformedObject = transformToObject(result.rows)
 
@@ -139,30 +135,30 @@ async function listSales(req: Request, res: Response) {
 
         res.status(200).send(transformedObject)
 
+    } catch (error) {
+
+        res.status(500).send({ erro: error })
+
     }
 
 }
-//rowsNumber by filter // search by query params
+
 async function createSale(req: Request, res: Response) {
 
-    const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category]
+    try {
 
-    database.query(createSaleQueries, values).then(
+        const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category]
 
-        (resultado) => {
-
-            res.status(200).send({ message: "sucesso" })
-
-        },
-
-        (erro) => {
-
-            res.status(500).send({ erro: erro })
-
-        }
+        const result = await database.query(createSaleQueries, values)
 
 
-    )
+        res.status(200).send({ message: "sucesso" })
+
+    } catch (error) {
+
+        res.status(500).send({ erro: error })
+
+    }
 
 }
 
