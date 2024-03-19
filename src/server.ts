@@ -1,8 +1,8 @@
-import  Express, {Application}  from "express"
+import Express, { Application } from "express"
 
-import {router as salesRoutes} from "./sales/routes";
+import { router as salesRoutes } from "./sales/routes";
 
-import {router as skinsRoutes} from "./skins/routes";
+import { router as skinsRoutes } from "./skins/routes";
 
 import bodyParser from "body-parser";
 
@@ -11,7 +11,14 @@ import cors from "cors"
 
 const app: Application = Express();
 
-const port: number = 3000;
+let port: number
+
+
+if (process.env.PORT) {
+
+    port = parseInt(process.env.PORT)
+
+} else port = 3000
 
 
 app.use(cors({
