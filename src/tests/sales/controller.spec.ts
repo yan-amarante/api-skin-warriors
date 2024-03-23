@@ -5,7 +5,6 @@ import { listSales, createSale, closeSale } from '../../sales/controllers'
 import database, { disconnectFromDatabase } from '../../database'
 
 
-// Mock database.query function
 jest.mock('../../database');
 
 describe('Sales Controller', () => {
@@ -47,10 +46,9 @@ describe('Sales Controller', () => {
 
     (database.query as jest.Mock).mockImplementation(async (query: string) => {
 
-      // Mock the database.query function to return a resolved promise with mock data
       if (query.includes('SELECT count(*) FROM sales')) {
 
-        return { rows: [{ count: 1 }] };
+        return { rows: [{ count: 14 }] };
 
       } else if (query.includes('SELECT * FROM sales')) {
 
@@ -64,11 +62,41 @@ describe('Sales Controller', () => {
 
     await listSales(req as Request, res as Response);
 
-    expect(database.query).toHaveBeenCalledTimes(2); // Check if query function was called twice
+    expect(database.query).toHaveBeenCalledTimes(2); 
 
     expect(res.status).toHaveBeenCalledWith(200);
 
-    expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: expect.any(Number) }));
+    expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: 1 }));
+
+  });
+
+  it('should list sales with all parameters', async () => {
+
+    (req.query as any) = { page: "1", name: "Desert Eagle", wear: "Pouco Usada" };
+
+    (database.query as jest.Mock).mockImplementation(async (query: string) => {
+
+      if (query.includes('SELECT count(*) FROM sales WHERE name=$1 AND wear=$2')) {
+
+        return { rows: [{ count: 140 }] };
+
+      } else if (query.includes('SELECT * FROM sales WHERE name=$2 AND wear=$3 OFFSET $1 LIMIT 14')) {
+
+        return { rows: [{ id: 1, image: 'image1', name: 'Desert Eagle', pattern: 'pattern1', wear: 'Pouco Usada', price: 10, category: 'category1' }] };
+
+      }
+
+      throw new Error('Invalid query');
+
+    });
+
+    await listSales(req as Request, res as Response);
+
+    expect(database.query).toHaveBeenCalledTimes(2); 
+
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: 10 }));
 
   });
 
@@ -76,7 +104,7 @@ describe('Sales Controller', () => {
 
     req.body = { image: 'test-image', name: 'test-name', pattern: 'test-pattern', wear: 'test-wear', price: 20, category: 'test-category' };
 
-    (database.query as jest.Mock).mockResolvedValueOnce({}); // Mock the query function to return a resolved promise
+    (database.query as jest.Mock).mockResolvedValueOnce({});
 
     await createSale(req as Request, res as Response);
 
@@ -92,7 +120,7 @@ describe('Sales Controller', () => {
 
     req.params = { id: "1" };
 
-    (database.query as jest.Mock).mockResolvedValueOnce({}); // Mock the query function to return a resolved promise
+    (database.query as jest.Mock).mockResolvedValueOnce({});
 
     await closeSale(req as Request, res as Response);
 

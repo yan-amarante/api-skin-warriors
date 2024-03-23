@@ -1,4 +1,4 @@
-import database, {connectDatabase} from "../database";
+import database, { connectDatabase } from "../database";
 
 import { listSalesQueries, listSalesCount, listSalesPageQueries, createSaleQueries } from "./queries"
 
@@ -70,11 +70,11 @@ async function listSales(req: Request, res: Response) {
 
     try {
 
-        const pageParams: any = req.query.page
+        const pageParams = req.query.page
 
-        const nameParam: any = req.query.name
+        const nameParam = req.query.name
 
-        const wearParam: any = req.query.wear
+        const wearParam = req.query.wear
 
 
         let filterQuery = 'SELECT count(*) FROM sales'
@@ -94,7 +94,7 @@ async function listSales(req: Request, res: Response) {
 
             filterParams = [nameParam, wearParam]
 
-            values = [(pageParams - 1) * 14, nameParam, wearParam]
+            values = [(Number(pageParams) - 1) * 14, nameParam, wearParam]
 
         } else if (nameParam !== undefined) {
 
@@ -104,7 +104,7 @@ async function listSales(req: Request, res: Response) {
 
             filterParams = [nameParam]
 
-            values = [(pageParams - 1) * 14, nameParam]
+            values = [(Number(pageParams) - 1) * 14, nameParam]
 
         } else if (wearParam !== undefined) {
 
@@ -114,13 +114,13 @@ async function listSales(req: Request, res: Response) {
 
             filterParams = [wearParam]
 
-            values = [(pageParams - 1) * 14, wearParam]
+            values = [(Number(pageParams) - 1) * 14, wearParam]
 
-        }else {
+        } else {
 
             filterQuery = 'SELECT count(*) FROM sales'
 
-            values = [(pageParams - 1) * 14]
+            values = [(Number(pageParams) - 1) * 14]
 
         }
 
