@@ -1,14 +1,26 @@
-import database, { connectDatabase } from "../database";
+import database from "../database";
 
 import { listSalesQueries, listSalesCount, listSalesPageQueries, createSaleQueries } from "./queries"
 
 import { Request, Response } from "express";
 
-connectDatabase()
+import { QueryResult } from "pg";
 
-function transformToObject(array: any) {
+interface Sales {
+    id: number,
+    image: string,
+    name: string,
+    pattern: string,
+    wear: string,
+    price: number,
+    category: string,
+    numberOfPages: number
+}
+type CreateSaleParams = [string, string, string, string, number, string]
 
-    const object = array.reduce((acc: any, item: any) => {
+
+function transformToObject(array: any[]) {
+    const object: Sales = array.reduce((acc: any, item: Sales) => {
         acc[item.id] = {
             id: item.id,
             image: item.image,
@@ -46,19 +58,19 @@ async function listAllSales(req: Request, res: Response) {
 
 }
 
-async function countNumberOfPages(query: string, value: any = null) {
+async function countNumberOfPages(query: string, value: (string | number)[] | null = null) {
 
-    let resultCount: any
+    let resultCount: QueryResult<any>
 
     if (value === null) resultCount = await database.query(query)
 
     else resultCount = await database.query(query, value)
 
-    const totalItems = resultCount.rows[0].count
+    const totalItems: number = resultCount.rows[0].count
 
-    const limit = 14
+    const limit: number = 14
 
-    const numberOfPages = Math.ceil(totalItems / limit)
+    const numberOfPages: number = Math.ceil(totalItems / limit)
 
     if (numberOfPages === 0) return 1
 
@@ -66,24 +78,24 @@ async function countNumberOfPages(query: string, value: any = null) {
 
 }
 
-async function listSales(req: Request, res: Response) {
+async function listSales(req: Request, res: Response): Promise<void> {
 
     try {
 
-        const pageParams = req.query.page
+        const pageParams = req.query.page as string
 
-        const nameParam = req.query.name
+        const nameParam = req.query.name as string
 
-        const wearParam = req.query.wear
+        const wearParam = req.query.wear as string
 
 
-        let filterQuery = 'SELECT count(*) FROM sales'
+        let filterQuery: string = 'SELECT count(*) FROM sales'
 
-        let values: any[] = []
+        let values: (string | number)[] = []
 
-        let resultQuery = 'SELECT * FROM sales'
+        let resultQuery: string = 'SELECT * FROM sales'
 
-        let filterParams: any[] = []
+        let filterParams: string[] = []
 
 
         if (nameParam !== undefined && wearParam !== undefined) {
@@ -124,12 +136,13 @@ async function listSales(req: Request, res: Response) {
 
         }
 
+        resultQuery += " OFFSET $1 LIMIT 14"
 
-        const rowsNumber = await countNumberOfPages(filterQuery, filterParams)
+        const rowsNumber: number = await countNumberOfPages(filterQuery, filterParams)
 
-        const result = await database.query(resultQuery + ' OFFSET $1 LIMIT 14', values)
+        const result: QueryResult<any> = await database.query(resultQuery, values)
 
-        const transformedObject = transformToObject(result.rows)
+        const transformedObject: Sales = transformToObject(result.rows)
 
         transformedObject.numberOfPages = rowsNumber
 
@@ -148,9 +161,9 @@ async function createSale(req: Request, res: Response) {
 
     try {
 
-        const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category]
+        const values: CreateSaleParams = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category]
 
-        const result = await database.query(createSaleQueries, values)
+        await database.query(createSaleQueries, values)
 
 
         res.status(200).send({ message: "sucesso" })
@@ -167,9 +180,9 @@ async function closeSale(req: Request, res: Response) {
 
     try {
 
-        const values = [req.params.id]
+        const values: [string] = [req.params.id]
 
-        let result: any = await database.query("DELETE FROM sales WHERE id=$1", values)
+        await database.query("DELETE FROM sales WHERE id=$1", values)
 
         res.status(200).send({ message: "sucesso" })
 

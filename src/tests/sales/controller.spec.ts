@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 
 import { listSales, createSale, closeSale } from '../../sales/controllers'
 
-import database, { disconnectFromDatabase } from '../../database'
+import database, {disconnectFromDatabase} from '../../database'
 
 
 jest.mock('../../database');

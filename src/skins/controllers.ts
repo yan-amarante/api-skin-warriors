@@ -1,16 +1,17 @@
-import database, { connectDatabase } from "../database";
+import database from "../database";
 
 import { listSkinsQueries, searchCategoriesQueries, searchPatternInfosQueries } from "./queries"
 
 import { Request, Response } from "express";
 
-connectDatabase()
+import { QueryResult } from "pg";
+
 
 async function listSkins(req: Request, res: Response) {
 
     try {
 
-        const result = await database.query(listSkinsQueries)
+        const result: QueryResult<any> = await database.query(listSkinsQueries)
 
         res.status(200).send({ skins: result.rows })
 
@@ -51,14 +52,14 @@ async function searchCategories(req: Request, res: Response) {
 
     try {
 
-        const queryParams = [req.query.patterns]
+        const queryParams = [req.query.patterns] as [string]
 
-        let resultPattern: any
+        let resultPattern:QueryResult<any> | null = null  //mudar depois
 
 
         if (queryParams.length) resultPattern = await database.query(searchPatternInfosQueries, queryParams)
 
-        const result = await database.query(searchCategoriesQueries)
+        const result:QueryResult<any> = await database.query(searchCategoriesQueries)
 
 
         const categoryName: any[] = removeDuplicateRows(result, "category.name", true)
@@ -66,7 +67,7 @@ async function searchCategories(req: Request, res: Response) {
         const weaponName: any[] = removeDuplicateRows(result, "weapon.name", false)
 
 
-        categoryName.push(resultPattern.rows)
+        if(resultPattern !== null) categoryName.push(resultPattern.rows)
 
         categoryName.push(weaponName)
 
@@ -76,15 +77,15 @@ async function searchCategories(req: Request, res: Response) {
 
         const transformedObject = flattenArray.reduce((acc, category) => {
 
-            const categoryName = category["category.name"]
+            const categoryName: string = category["category.name"]
 
-            const weaponName = category["weapon.name"]
+            const weaponName: string = category["weapon.name"]
 
-            const patternName = category["pattern.name"]
+            const patternName: string = category["pattern.name"]
 
-            const wears = category["wears"]
+            const wears: string = category["wears"]
 
-            const image = category["image"]
+            const image: string = category["image"]
 
 
             if (categoryName) {

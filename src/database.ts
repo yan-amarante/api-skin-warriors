@@ -8,22 +8,9 @@ dotenv.config();
 
 const database: Client = new pg.Client(process.env.DATABASE_URL);
 
+database.connect()
 
-export const connectDatabase = async () => {
-
-    try {
-
-        await database.connect()
-
-        console.log("Conectado ao ElephantSQL!")
-
-    } catch (error) {
-
-        console.log("Não foi possivel conectar com o ElephantSQL", error)
-
-    }
-
-}
+console.log("Conectado ao ElephantSQL!")
 
 export const disconnectFromDatabase = async () => {
 

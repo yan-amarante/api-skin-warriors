@@ -25,7 +25,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const controllers_1 = require("../../sales/controllers");
 const database_1 = __importStar(require("../../database"));
-// Mock database.query function
 jest.mock('../../database');
 describe('Sales Controller', () => {
     let req;
@@ -46,9 +45,8 @@ describe('Sales Controller', () => {
     it('should list sales', async () => {
         req.query = { page: "1" };
         database_1.default.query.mockImplementation(async (query) => {
-            // Mock the database.query function to return a resolved promise with mock data
             if (query.includes('SELECT count(*) FROM sales')) {
-                return { rows: [{ count: 1 }] };
+                return { rows: [{ count: 14 }] };
             }
             else if (query.includes('SELECT * FROM sales')) {
                 return { rows: [{ id: 1, image: 'image1', name: 'item1', pattern: 'pattern1', wear: 'wear1', price: 10, category: 'category1' }] };
@@ -56,13 +54,29 @@ describe('Sales Controller', () => {
             throw new Error('Invalid query');
         });
         await (0, controllers_1.listSales)(req, res);
-        expect(database_1.default.query).toHaveBeenCalledTimes(2); // Check if query function was called twice
+        expect(database_1.default.query).toHaveBeenCalledTimes(2);
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: expect.any(Number) }));
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: 1 }));
+    });
+    it('should list sales with all parameters', async () => {
+        req.query = { page: "1", name: "Desert Eagle", wear: "Pouco Usada" };
+        database_1.default.query.mockImplementation(async (query) => {
+            if (query.includes('SELECT count(*) FROM sales WHERE name=$1 AND wear=$2')) {
+                return { rows: [{ count: 140 }] };
+            }
+            else if (query.includes('SELECT * FROM sales WHERE name=$2 AND wear=$3 OFFSET $1 LIMIT 14')) {
+                return { rows: [{ id: 1, image: 'image1', name: 'Desert Eagle', pattern: 'pattern1', wear: 'Pouco Usada', price: 10, category: 'category1' }] };
+            }
+            throw new Error('Invalid query');
+        });
+        await (0, controllers_1.listSales)(req, res);
+        expect(database_1.default.query).toHaveBeenCalledTimes(2);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ numberOfPages: 10 }));
     });
     it('should create a sale', async () => {
         req.body = { image: 'test-image', name: 'test-name', pattern: 'test-pattern', wear: 'test-wear', price: 20, category: 'test-category' };
-        database_1.default.query.mockResolvedValueOnce({}); // Mock the query function to return a resolved promise
+        database_1.default.query.mockResolvedValueOnce({});
         await (0, controllers_1.createSale)(req, res);
         expect(database_1.default.query).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(200);
@@ -70,7 +84,7 @@ describe('Sales Controller', () => {
     });
     it('should close a sale', async () => {
         req.params = { id: "1" };
-        database_1.default.query.mockResolvedValueOnce({}); // Mock the query function to return a resolved promise
+        database_1.default.query.mockResolvedValueOnce({});
         await (0, controllers_1.closeSale)(req, res);
         expect(database_1.default.query).toHaveBeenCalledTimes(1);
         expect(res.status).toHaveBeenCalledWith(200);

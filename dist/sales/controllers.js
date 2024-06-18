@@ -1,32 +1,11 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.closeSale = exports.createSale = exports.listSales = void 0;
-const database_1 = __importStar(require("../database"));
+const database_1 = __importDefault(require("../database"));
 const queries_1 = require("./queries");
-(0, database_1.connectDatabase)();
 function transformToObject(array) {
     const object = array.reduce((acc, item) => {
         acc[item.id] = {
@@ -79,26 +58,27 @@ async function listSales(req, res) {
             filterQuery = 'SELECT count(*) FROM sales WHERE name=$1 AND wear=$2';
             resultQuery = 'SELECT * FROM sales WHERE name=$2 AND wear=$3';
             filterParams = [nameParam, wearParam];
-            values = [(pageParams - 1) * 14, nameParam, wearParam];
+            values = [(Number(pageParams) - 1) * 14, nameParam, wearParam];
         }
         else if (nameParam !== undefined) {
             filterQuery = 'SELECT count(*) FROM sales WHERE name=$1';
             resultQuery = 'SELECT * FROM sales WHERE name=$2';
             filterParams = [nameParam];
-            values = [(pageParams - 1) * 14, nameParam];
+            values = [(Number(pageParams) - 1) * 14, nameParam];
         }
         else if (wearParam !== undefined) {
             filterQuery = 'SELECT count(*) FROM sales WHERE wear=$1';
             resultQuery = 'SELECT * FROM sales WHERE wear=$2';
             filterParams = [wearParam];
-            values = [(pageParams - 1) * 14, wearParam];
+            values = [(Number(pageParams) - 1) * 14, wearParam];
         }
         else {
             filterQuery = 'SELECT count(*) FROM sales';
-            values = [(pageParams - 1) * 14];
+            values = [(Number(pageParams) - 1) * 14];
         }
+        resultQuery += " OFFSET $1 LIMIT 14";
         const rowsNumber = await countNumberOfPages(filterQuery, filterParams);
-        const result = await database_1.default.query(resultQuery + ' OFFSET $1 LIMIT 14', values);
+        const result = await database_1.default.query(resultQuery, values);
         const transformedObject = transformToObject(result.rows);
         transformedObject.numberOfPages = rowsNumber;
         res.status(200).send(transformedObject);
@@ -111,7 +91,7 @@ exports.listSales = listSales;
 async function createSale(req, res) {
     try {
         const values = [req.body.image, req.body.name, req.body.pattern, req.body.wear, req.body.price, req.body.category];
-        const result = await database_1.default.query(queries_1.createSaleQueries, values);
+        await database_1.default.query(queries_1.createSaleQueries, values);
         res.status(200).send({ message: "sucesso" });
     }
     catch (error) {
@@ -122,7 +102,7 @@ exports.createSale = createSale;
 async function closeSale(req, res) {
     try {
         const values = [req.params.id];
-        let result = await database_1.default.query("DELETE FROM sales WHERE id=$1", values);
+        await database_1.default.query("DELETE FROM sales WHERE id=$1", values);
         res.status(200).send({ message: "sucesso" });
     }
     catch (erro) {
